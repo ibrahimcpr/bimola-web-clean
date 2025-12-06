@@ -64,7 +64,9 @@ export default function GalleryManager() {
         // Check if upload was successful (either success flag or image object)
         if (data.success !== false && (data.success || data.image)) {
           setMessage({ type: 'success', text: 'Fotoğraf başarıyla yüklendi!' })
-          e.currentTarget.reset()
+          if (e.currentTarget) {
+            e.currentTarget.reset()
+          }
           // Small delay to ensure file is written before refreshing
           setTimeout(() => {
             fetchImages()

@@ -59,7 +59,9 @@ export default function MenuManager() {
 
       if (response.ok) {
         setMessage({ type: 'success', text: 'Menü görseli başarıyla yüklendi!' })
-        e.currentTarget.reset()
+        if (e.currentTarget) {
+          e.currentTarget.reset()
+        }
         fetchMenu()
       } else {
         setMessage({ type: 'error', text: data.error || 'Yükleme başarısız' })

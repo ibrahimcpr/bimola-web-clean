@@ -85,7 +85,9 @@ export default function SettingsForm({ settings }: SettingsFormProps) {
         const newLogoPath = data.logoPath
         setLogoPath(newLogoPath)
         setMessage({ type: 'success', text: `Logo başarıyla yüklendi! (${newLogoPath})` })
-        e.currentTarget.reset()
+        if (e.currentTarget) {
+          e.currentTarget.reset()
+        }
         console.log('Logo uploaded successfully:', newLogoPath)
         
         // Force refresh of all pages after a short delay
