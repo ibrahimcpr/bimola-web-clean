@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isAuthenticated } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
+import { put, del } from '@vercel/blob'
 import { randomUUID } from 'crypto'
 
 export async function GET() {
@@ -47,18 +46,14 @@ export async function POST(request: NextRequest) {
     })
     const newOrder = maxOrderImage ? maxOrderImage.order + 1 : 0
 
-    // Save file
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-
-    const uploadsDir = join(process.cwd(), 'public', 'uploads', 'gallery')
-    await mkdir(uploadsDir, { recursive: true })
-
+    // Upload to Vercel Blob Storage
     const filename = `${randomUUID()}-${file.name}`
-    const filepath = join(uploadsDir, filename)
-    await writeFile(filepath, buffer)
+    const blob = await put(`gallery/${filename}`, file, {
+      access: 'public',
+      contentType: file.type,
+    })
 
-    const relativePath = `/uploads/gallery/${filename}`
+    const relativePath = blob.url
 
     // Save to database
     const imageId = randomUUID()
@@ -100,14 +95,14 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Image not found' }, { status: 404 })
     }
 
-    // Delete file
-    const { unlink } = await import('fs/promises')
-    const { join } = await import('path')
-    const filepath = join(process.cwd(), 'public', image.path)
-    try {
-      await unlink(filepath)
-    } catch (err) {
-      // File might not exist, continue anyway
+    // Delete file from Vercel Blob
+    if (image.path.startsWith('https://')) {
+      try {
+        await del(image.path)
+      } catch (err) {
+        // File might not exist, continue anyway
+        console.log('Could not delete file from blob:', err)
+      }
     }
 
     // Delete from database

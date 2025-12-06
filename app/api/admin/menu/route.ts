@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isAuthenticated } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { writeFile, mkdir, unlink } from 'fs/promises'
-import { join } from 'path'
+import { put, del } from '@vercel/blob'
 import { randomUUID } from 'crypto'
 
 export async function GET() {
@@ -46,35 +45,32 @@ export async function POST(request: NextRequest) {
       where: { id: 'default' },
     })
 
-    if (existingMenu?.imagePath) {
+    if (existingMenu?.imagePath && existingMenu.imagePath.startsWith('https://')) {
       try {
-        const oldFilepath = join(process.cwd(), 'public', existingMenu.imagePath)
-        await unlink(oldFilepath)
+        // Delete from Vercel Blob if it's a blob URL
+        await del(existingMenu.imagePath)
       } catch (err) {
         // File might not exist, continue anyway
+        console.log('Could not delete old file:', err)
       }
     }
 
-    // Save new file
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-
-    const uploadsDir = join(process.cwd(), 'public', 'uploads', 'menu')
-    await mkdir(uploadsDir, { recursive: true })
-
+    // Upload to Vercel Blob Storage
     const filename = `menu-${randomUUID()}.jpg`
-    const filepath = join(uploadsDir, filename)
-    await writeFile(filepath, buffer)
+    const blob = await put(`menu/${filename}`, file, {
+      access: 'public',
+      contentType: file.type,
+    })
 
-    const relativePath = `/uploads/menu/${filename}`
+    const imagePath = blob.url
 
     // Update database
     const menu = await prisma.menu.upsert({
       where: { id: 'default' },
-      update: { imagePath: relativePath },
+      update: { imagePath: imagePath },
       create: {
         id: 'default',
-        imagePath: relativePath,
+        imagePath: imagePath,
       },
     })
 

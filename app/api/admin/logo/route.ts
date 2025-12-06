@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isAuthenticated } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { writeFile, mkdir, unlink } from 'fs/promises'
-import { join } from 'path'
+import { put, del } from '@vercel/blob'
 import { randomUUID } from 'crypto'
 
 export async function POST(request: NextRequest) {
@@ -39,33 +38,29 @@ export async function POST(request: NextRequest) {
     })
 
     // Delete old logo if it exists and is not the placeholder
-    if (existingSettings?.logoPath && !existingSettings.logoPath.includes('logo-placeholder')) {
+    if (existingSettings?.logoPath && 
+        !existingSettings.logoPath.includes('logo-placeholder') &&
+        existingSettings.logoPath.startsWith('https://')) {
       try {
-        const oldFilepath = join(process.cwd(), 'public', existingSettings.logoPath)
-        await unlink(oldFilepath)
+        await del(existingSettings.logoPath)
       } catch (err) {
         // File might not exist, continue anyway
+        console.log('Could not delete old logo:', err)
       }
     }
 
-    // Save new file
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-
-    const uploadsDir = join(process.cwd(), 'public', 'uploads', 'logo')
-    await mkdir(uploadsDir, { recursive: true })
-
-    // Get file extension
+    // Upload to Vercel Blob Storage
     const extension = file.name.split('.').pop()?.toLowerCase() || 'png'
     const filename = `logo-${randomUUID()}.${extension}`
-    const filepath = join(uploadsDir, filename)
     
-    console.log('Saving file to:', filepath)
-    await writeFile(filepath, buffer)
-    console.log('File saved successfully')
-
-    const relativePath = `/uploads/logo/${filename}`
-    console.log('Relative path:', relativePath)
+    console.log('Uploading file to blob storage:', filename)
+    const blob = await put(`logo/${filename}`, file, {
+      access: 'public',
+      contentType: file.type,
+    })
+    
+    const relativePath = blob.url
+    console.log('File uploaded successfully:', relativePath)
 
     // Update database
     const settings = await prisma.settings.update({
