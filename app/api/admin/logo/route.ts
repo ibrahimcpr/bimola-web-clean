@@ -1,0 +1,88 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { isAuthenticated } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { writeFile, mkdir, unlink } from 'fs/promises'
+import { join } from 'path'
+import { randomUUID } from 'crypto'
+
+export async function POST(request: NextRequest) {
+  const authenticated = await isAuthenticated()
+  if (!authenticated) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  try {
+    const formData = await request.formData()
+    const file = formData.get('file') as File
+
+    console.log('Logo upload request received')
+    console.log('File:', file ? { name: file.name, type: file.type, size: file.size } : 'null')
+
+    if (!file) {
+      console.error('No file provided in request')
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+    }
+
+    // Validate file type - images only
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/svg+xml', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      console.error('Invalid file type:', file.type)
+      return NextResponse.json(
+        { error: `Invalid file type: ${file.type}. Only image files are allowed.` },
+        { status: 400 }
+      )
+    }
+
+    // Get current settings to delete old logo
+    const existingSettings = await prisma.settings.findUnique({
+      where: { id: 'default' },
+    })
+
+    // Delete old logo if it exists and is not the placeholder
+    if (existingSettings?.logoPath && !existingSettings.logoPath.includes('logo-placeholder')) {
+      try {
+        const oldFilepath = join(process.cwd(), 'public', existingSettings.logoPath)
+        await unlink(oldFilepath)
+      } catch (err) {
+        // File might not exist, continue anyway
+      }
+    }
+
+    // Save new file
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+
+    const uploadsDir = join(process.cwd(), 'public', 'uploads', 'logo')
+    await mkdir(uploadsDir, { recursive: true })
+
+    // Get file extension
+    const extension = file.name.split('.').pop()?.toLowerCase() || 'png'
+    const filename = `logo-${randomUUID()}.${extension}`
+    const filepath = join(uploadsDir, filename)
+    
+    console.log('Saving file to:', filepath)
+    await writeFile(filepath, buffer)
+    console.log('File saved successfully')
+
+    const relativePath = `/uploads/logo/${filename}`
+    console.log('Relative path:', relativePath)
+
+    // Update database
+    const settings = await prisma.settings.update({
+      where: { id: 'default' },
+      data: { logoPath: relativePath },
+    })
+
+    console.log('Logo uploaded successfully:', relativePath)
+    console.log('File saved to:', filepath)
+
+    return NextResponse.json({ success: true, logoPath: relativePath, settings })
+  } catch (error) {
+    console.error('Logo upload error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+

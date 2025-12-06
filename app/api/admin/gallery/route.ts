@@ -1,0 +1,125 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { isAuthenticated } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { writeFile, mkdir } from 'fs/promises'
+import { join } from 'path'
+import { randomUUID } from 'crypto'
+
+export async function GET() {
+  const authenticated = await isAuthenticated()
+  if (!authenticated) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const images = await prisma.galleryImage.findMany({
+    orderBy: { order: 'asc' },
+  })
+
+  return NextResponse.json(images)
+}
+
+export async function POST(request: NextRequest) {
+  const authenticated = await isAuthenticated()
+  if (!authenticated) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  try {
+    const formData = await request.formData()
+    const file = formData.get('file') as File
+
+    if (!file) {
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      return NextResponse.json(
+        { error: 'Invalid file type. Only JPG, PNG, and WebP are allowed.' },
+        { status: 400 }
+      )
+    }
+
+    // Get max order to append at the end
+    const maxOrderImage = await prisma.galleryImage.findFirst({
+      orderBy: { order: 'desc' },
+    })
+    const newOrder = maxOrderImage ? maxOrderImage.order + 1 : 0
+
+    // Save file
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+
+    const uploadsDir = join(process.cwd(), 'public', 'uploads', 'gallery')
+    await mkdir(uploadsDir, { recursive: true })
+
+    const filename = `${randomUUID()}-${file.name}`
+    const filepath = join(uploadsDir, filename)
+    await writeFile(filepath, buffer)
+
+    const relativePath = `/uploads/gallery/${filename}`
+
+    // Save to database
+    const imageId = randomUUID()
+    const image = await prisma.galleryImage.create({
+      data: {
+        id: imageId,
+        path: relativePath,
+        order: newOrder,
+      },
+    })
+
+    return NextResponse.json({ success: true, image })
+  } catch (error) {
+    console.error('Gallery upload error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error'
+    return NextResponse.json(
+      { error: errorMessage, details: error instanceof Error ? error.stack : undefined },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  const authenticated = await isAuthenticated()
+  if (!authenticated) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json({ error: 'Image ID required' }, { status: 400 })
+    }
+
+    const image = await prisma.galleryImage.findUnique({ where: { id } })
+    if (!image) {
+      return NextResponse.json({ error: 'Image not found' }, { status: 404 })
+    }
+
+    // Delete file
+    const { unlink } = await import('fs/promises')
+    const { join } = await import('path')
+    const filepath = join(process.cwd(), 'public', image.path)
+    try {
+      await unlink(filepath)
+    } catch (err) {
+      // File might not exist, continue anyway
+    }
+
+    // Delete from database
+    await prisma.galleryImage.delete({ where: { id } })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Gallery delete error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
