@@ -4,13 +4,13 @@
     "private": true,
     "scripts": {
         "dev": "next dev",
-        "build": "prisma generate && next build",
-        "postinstall": "prisma generate",
-        "vercel-build": "prisma generate && prisma migrate deploy && next build",
+        "build": "npx prisma generate && next build",
+        "postinstall": "npx prisma generate",
+        "vercel-build": "npx prisma generate && npx prisma migrate deploy && next build",
         "start": "next start",
         "lint": "next lint",
-        "db:push": "prisma db push",
-        "db:studio": "prisma studio",
+        "db:push": "npx prisma db push",
+        "db:studio": "npx prisma studio",
         "db:seed": "tsx prisma/seed.ts"
     },
     "dependencies": {
