@@ -69,7 +69,6 @@ export async function POST(request: NextRequest) {
     })
 
     console.log('Logo uploaded successfully:', relativePath)
-    console.log('File saved to:', filepath)
 
     return NextResponse.json({ success: true, logoPath: relativePath, settings })
   } catch (error) {
