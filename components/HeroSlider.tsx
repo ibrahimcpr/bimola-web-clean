@@ -50,16 +50,29 @@ export default function HeroSlider({ images }: HeroSliderProps) {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.8, ease: 'easeInOut' }}
-          className="absolute inset-0"
+          className="absolute inset-0 w-full h-full"
         >
-          <Image
-            src={images[currentIndex].path}
-            alt={`Galeri ${currentIndex + 1}`}
-            fill
-            className="object-cover"
-            priority={currentIndex === 0}
-            onLoad={() => setIsLoaded(true)}
-          />
+          {images[currentIndex].path.startsWith('http') ? (
+            <img
+              src={images[currentIndex].path}
+              alt={`Galeri ${currentIndex + 1}`}
+              className="absolute inset-0 w-full h-full object-cover"
+              onLoad={() => setIsLoaded(true)}
+              onError={(e) => {
+                console.error('Failed to load gallery image:', images[currentIndex].path)
+                e.currentTarget.style.display = 'none'
+              }}
+            />
+          ) : (
+            <Image
+              src={images[currentIndex].path}
+              alt={`Galeri ${currentIndex + 1}`}
+              fill
+              className="object-cover"
+              priority={currentIndex === 0}
+              onLoad={() => setIsLoaded(true)}
+            />
+          )}
         </motion.div>
       </AnimatePresence>
 
