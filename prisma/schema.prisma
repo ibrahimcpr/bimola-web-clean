@@ -6,18 +6,18 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model Settings {
   id          String   @id @default("default")
   introText   String   @default("Bi Mola, el açması gözleme ve mantısıyla sıcak ve samimi bir mola noktasıdır. Taze malzemelerle hazırlanan lezzetlerimizle sizleri bekliyoruz.")
-  youtubeUrl  String?  @default("")
-  mapLat      Float?   @default(41.0082)
-  mapLng      Float?   @default(28.9784)
+  youtubeUrl  String?
+  mapLat      Float?
+  mapLng      Float?
   mapZoom     Int      @default(15)
-  addressText String?  @default("")
+  addressText String?
   logoPath    String?  @default("/logo.svg")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -40,10 +40,10 @@ model Menu {
 
 model Contact {
   id        String   @id @default("default")
-  phone     String?  @default("")
-  address   String?  @default("")
-  instagram String?  @default("")
-  tiktok    String?  @default("")
+  phone     String?
+  address   String?
+  instagram String?
+  tiktok    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
