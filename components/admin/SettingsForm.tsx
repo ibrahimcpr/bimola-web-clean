@@ -204,7 +204,15 @@ export default function SettingsForm({ settings }: SettingsFormProps) {
                 alt="Logo"
                 className="w-24 h-24 object-contain border border-gray-200 rounded-lg p-2"
                 onError={(e) => {
-                  e.currentTarget.src = '/logo-placeholder.svg'
+                  // Try default logo first, then placeholder
+                  if (e.currentTarget.src.includes('logo-placeholder')) {
+                    return // Already tried placeholder
+                  }
+                  if (e.currentTarget.src.includes('/logo.svg') || e.currentTarget.src.includes('blob')) {
+                    e.currentTarget.src = '/logo.svg'
+                  } else {
+                    e.currentTarget.src = '/logo-placeholder.svg'
+                  }
                 }}
               />
               <p className="text-xs text-gray-500 mt-1 text-center max-w-24 truncate">

@@ -65,8 +65,19 @@ export default function Navigation() {
                 alt="Bi Mola Logo"
                 className="w-full h-full object-contain"
                 onError={(e) => {
-                  console.error('Logo load error, falling back to placeholder:', logoPath)
-                  e.currentTarget.src = '/logo-placeholder.svg'
+                  console.error('Logo load error, trying fallback:', logoPath)
+                  // Try default logo first, then placeholder
+                  if (e.currentTarget.src.includes('logo-placeholder')) {
+                    // Already tried placeholder, stop trying
+                    return
+                  }
+                  if (e.currentTarget.src.includes('/logo.svg') || e.currentTarget.src.includes('blob')) {
+                    // Try default logo.svg
+                    e.currentTarget.src = '/logo.svg'
+                  } else {
+                    // Try placeholder
+                    e.currentTarget.src = '/logo-placeholder.svg'
+                  }
                 }}
                 onLoad={() => {
                   console.log('Logo loaded successfully:', logoPath)
