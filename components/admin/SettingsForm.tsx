@@ -30,7 +30,7 @@ export default function SettingsForm({ settings }: SettingsFormProps) {
   const [loading, setLoading] = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
-  const [logoPath, setLogoPath] = useState(settings?.logoPath || '/logo.svg')
+  const [logoPath, setLogoPath] = useState(settings?.logoPath || null)
 
   const handleLogoUpload = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -199,22 +199,24 @@ export default function SettingsForm({ settings }: SettingsFormProps) {
           <h3 className="text-lg font-semibold mb-4">Logo Yükle</h3>
           <div className="flex items-start space-x-6">
             <div className="flex-shrink-0">
-              <img
-                src={`${logoPath}?t=${Date.now()}`}
-                alt="Logo"
-                className="w-24 h-24 object-contain border border-gray-200 rounded-lg p-2"
-                onError={(e) => {
-                  // Try default logo first, then placeholder
-                  if (e.currentTarget.src.includes('logo-placeholder')) {
-                    return // Already tried placeholder
-                  }
-                  if (e.currentTarget.src.includes('/logo.svg') || e.currentTarget.src.includes('blob')) {
-                    e.currentTarget.src = '/logo.svg'
-                  } else {
-                    e.currentTarget.src = '/logo-placeholder.svg'
-                  }
-                }}
-              />
+              {logoPath ? (
+                <img
+                  src={`${logoPath}?t=${Date.now()}`}
+                  alt="Logo"
+                  className="w-24 h-24 object-contain border border-gray-200 rounded-lg p-2"
+                  onError={(e) => {
+                    console.error('Logo load error:', logoPath)
+                    // If blob URL fails, show placeholder
+                    if (logoPath.startsWith('http')) {
+                      e.currentTarget.src = '/logo-placeholder.svg'
+                    }
+                  }}
+                />
+              ) : (
+                <div className="w-24 h-24 bg-primary rounded-lg flex items-center justify-center border border-gray-200">
+                  <span className="text-secondary text-sm font-bold">Logo Yok</span>
+                </div>
+              )}
               <p className="text-xs text-gray-500 mt-1 text-center max-w-24 truncate">
                 {logoPath.replace('/uploads/logo/', '')}
               </p>

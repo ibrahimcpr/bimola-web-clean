@@ -21,14 +21,18 @@ export default async function RootLayout({
     where: { id: 'default' },
   })
 
-  const logoPath = settings?.logoPath || '/logo.svg'
+        const logoPath = settings?.logoPath || null
 
-  return (
-    <html lang="tr">
-      <head>
-        <link rel="icon" href={logoPath} />
-        <link rel="apple-touch-icon" href={logoPath} />
-      </head>
+        return (
+          <html lang="tr">
+            <head>
+              {logoPath && (
+                <>
+                  <link rel="icon" href={logoPath} />
+                  <link rel="apple-touch-icon" href={logoPath} />
+                </>
+              )}
+            </head>
       <body className={inter.className}>
         <Navigation />
         <main className="min-h-screen">

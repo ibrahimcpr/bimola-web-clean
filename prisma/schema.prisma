@@ -18,7 +18,7 @@ model Settings {
   mapLng      Float?
   mapZoom     Int      @default(15)
   addressText String?
-  logoPath    String?  @default("/logo.svg")
+  logoPath    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

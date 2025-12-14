@@ -17,7 +17,7 @@ async function main() {
       mapLng: 28.9784,
       mapZoom: 15,
       addressText: '',
-      logoPath: '/logo.svg',
+      logoPath: null,
     },
   })
 

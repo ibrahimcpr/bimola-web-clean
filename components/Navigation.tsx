@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
-  const [logoPath, setLogoPath] = useState('/logo.svg')
+  const [logoPath, setLogoPath] = useState<string | null>(null)
   const [logoTimestamp, setLogoTimestamp] = useState(Date.now())
 
   useEffect(() => {
@@ -59,30 +59,28 @@ export default function Navigation() {
               whileTap={{ scale: 0.95 }}
               className="relative w-16 h-16"
             >
-              <img
-                key={logoTimestamp}
-                src={`${logoPath}?t=${logoTimestamp}`}
-                alt="Bi Mola Logo"
-                className="w-full h-full object-contain"
-                onError={(e) => {
-                  console.error('Logo load error, trying fallback:', logoPath)
-                  // Try default logo first, then placeholder
-                  if (e.currentTarget.src.includes('logo-placeholder')) {
-                    // Already tried placeholder, stop trying
-                    return
-                  }
-                  if (e.currentTarget.src.includes('/logo.svg') || e.currentTarget.src.includes('blob')) {
-                    // Try default logo.svg
-                    e.currentTarget.src = '/logo.svg'
-                  } else {
-                    // Try placeholder
-                    e.currentTarget.src = '/logo-placeholder.svg'
-                  }
-                }}
-                onLoad={() => {
-                  console.log('Logo loaded successfully:', logoPath)
-                }}
-              />
+              {logoPath ? (
+                <img
+                  key={logoTimestamp}
+                  src={`${logoPath}?t=${logoTimestamp}`}
+                  alt="Bi Mola Logo"
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    console.error('Logo load error:', logoPath)
+                    // If blob URL fails, show placeholder
+                    if (logoPath.startsWith('http')) {
+                      e.currentTarget.src = '/logo-placeholder.svg'
+                    }
+                  }}
+                  onLoad={() => {
+                    console.log('Logo loaded successfully:', logoPath)
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full bg-primary rounded-lg flex items-center justify-center">
+                  <span className="text-secondary text-xl font-bold">BM</span>
+                </div>
+              )}
             </motion.div>
             <span className="text-2xl font-bold text-primary">Bi Mola</span>
           </Link>
