@@ -66,6 +66,22 @@ export default function SettingsForm({ settings }: SettingsFormProps) {
       return false
     }
 
+    // Validate file size (10MB limit)
+    const maxSize = 10 * 1024 * 1024 // 10MB
+    if (file.size > maxSize) {
+      setMessage({ type: 'error', text: 'Dosya boyutu çok büyük. Maksimum 10MB olmalıdır.' })
+      setUploadingLogo(false)
+      return false
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/svg+xml', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      setMessage({ type: 'error', text: 'Geçersiz dosya tipi. Sadece JPG, PNG, SVG ve WebP formatları desteklenir.' })
+      setUploadingLogo(false)
+      return false
+    }
+
     try {
       const uploadFormData = new FormData()
       uploadFormData.append('file', file)
@@ -78,13 +94,27 @@ export default function SettingsForm({ settings }: SettingsFormProps) {
       
       console.log('Response status:', response.status)
 
-      const data = await response.json()
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type')
+      let data
+
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json()
+      } else {
+        // If not JSON, try to get text response
+        const text = await response.text()
+        console.error('Non-JSON response:', text)
+        setMessage({ type: 'error', text: `Sunucu hatası: ${response.status} ${response.statusText}` })
+        setUploadingLogo(false)
+        return
+      }
+
       console.log('Logo upload response:', { status: response.status, data })
 
       if (response.ok && data.success) {
         const newLogoPath = data.logoPath
         setLogoPath(newLogoPath)
-        setMessage({ type: 'success', text: `Logo başarıyla yüklendi! (${newLogoPath})` })
+        setMessage({ type: 'success', text: `Logo başarıyla yüklendi!` })
         if (e.currentTarget) {
           e.currentTarget.reset()
         }
@@ -100,9 +130,12 @@ export default function SettingsForm({ settings }: SettingsFormProps) {
         console.error('Logo upload failed:', errorMsg)
       }
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Bir hata oluştu'
-      setMessage({ type: 'error', text: errorMsg })
       console.error('Logo upload exception:', error)
+      if (error instanceof SyntaxError && error.message.includes('JSON')) {
+        setMessage({ type: 'error', text: 'Sunucu yanıtı geçersiz. Lütfen tekrar deneyin.' })
+      } else {
+        setMessage({ type: 'error', text: `Bir hata oluştu: ${error instanceof Error ? error.message : 'Bilinmeyen hata'}` })
+      }
     } finally {
       setUploadingLogo(false)
     }

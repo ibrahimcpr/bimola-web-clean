@@ -22,6 +22,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
+    // Validate file size (10MB limit)
+    const maxSize = 10 * 1024 * 1024 // 10MB
+    if (file.size > maxSize) {
+      console.error('File size too large:', file.size)
+      return NextResponse.json(
+        { error: 'File size too large. Maximum size is 10MB.' },
+        { status: 400 }
+      )
+    }
+
+    if (file.size === 0) {
+      console.error('File is empty')
+      return NextResponse.json(
+        { error: 'File is empty.' },
+        { status: 400 }
+      )
+    }
+
     // Validate file type - images only
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/svg+xml', 'image/webp']
     if (!allowedTypes.includes(file.type)) {
