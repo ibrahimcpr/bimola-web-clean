@@ -1,5 +1,6 @@
 # Bi Mola Website
 
+
 Modern, production-ready website for Bi Mola restaurant/café built with Next.js, TypeScript, Tailwind CSS, and Prisma.
 
 ## Features
