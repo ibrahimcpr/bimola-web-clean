@@ -34,36 +34,16 @@ export default function SettingsForm({ settings }: SettingsFormProps) {
 
   const handleLogoUpload = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    e.stopPropagation()
-    
-    // Double check - prevent any default behavior
-    if (e.defaultPrevented) {
-      console.log('Event already prevented')
-    }
-    
     setUploadingLogo(true)
     setMessage(null)
 
-    // Get file from input element directly
-    const fileInput = document.getElementById('logo-upload') as HTMLInputElement
-    if (!fileInput) {
-      console.error('File input not found!')
-      setMessage({ type: 'error', text: 'Form hatası - sayfayı yenileyin' })
+    const formData = new FormData(e.currentTarget)
+    const file = formData.get('file') as File
+
+    if (!file) {
+      setMessage({ type: 'error', text: 'Lütfen bir dosya seçin' })
       setUploadingLogo(false)
       return
-    }
-    
-    const file = fileInput.files?.[0]
-
-    console.log('Logo upload form submitted')
-    console.log('File from input:', file ? { name: file.name, type: file.type, size: file.size } : 'null')
-
-    if (!file || file.size === 0) {
-      const errorMsg = !file ? 'Lütfen bir dosya seçin' : 'Dosya boş görünüyor'
-      setMessage({ type: 'error', text: errorMsg })
-      setUploadingLogo(false)
-      console.error('No file selected or file is empty')
-      return false
     }
 
     // Validate file size (10MB limit)
@@ -71,7 +51,7 @@ export default function SettingsForm({ settings }: SettingsFormProps) {
     if (file.size > maxSize) {
       setMessage({ type: 'error', text: 'Dosya boyutu çok büyük. Maksimum 10MB olmalıdır.' })
       setUploadingLogo(false)
-      return false
+      return
     }
 
     // Validate file type
@@ -79,20 +59,17 @@ export default function SettingsForm({ settings }: SettingsFormProps) {
     if (!allowedTypes.includes(file.type)) {
       setMessage({ type: 'error', text: 'Geçersiz dosya tipi. Sadece JPG, PNG, SVG ve WebP formatları desteklenir.' })
       setUploadingLogo(false)
-      return false
+      return
     }
 
     try {
       const uploadFormData = new FormData()
       uploadFormData.append('file', file)
 
-      console.log('Sending POST request to /api/admin/logo')
       const response = await fetch('/api/admin/logo', {
         method: 'POST',
         body: uploadFormData,
       })
-      
-      console.log('Response status:', response.status)
 
       // Check if response is JSON
       const contentType = response.headers.get('content-type')
@@ -111,23 +88,28 @@ export default function SettingsForm({ settings }: SettingsFormProps) {
 
       console.log('Logo upload response:', { status: response.status, data })
 
-      if (response.ok && data.success) {
-        const newLogoPath = data.logoPath
-        setLogoPath(newLogoPath)
-        setMessage({ type: 'success', text: `Logo başarıyla yüklendi!` })
-        if (e.currentTarget) {
-          e.currentTarget.reset()
+      if (response.ok) {
+        // Check if upload was successful (either success flag or logoPath)
+        if (data.success !== false && (data.success || data.logoPath)) {
+          const newLogoPath = data.logoPath
+          setLogoPath(newLogoPath)
+          setMessage({ type: 'success', text: 'Logo başarıyla yüklendi!' })
+          if (e.currentTarget) {
+            e.currentTarget.reset()
+          }
+          console.log('Logo uploaded successfully:', newLogoPath)
+          
+          // Force refresh after a short delay
+          setTimeout(() => {
+            window.location.reload()
+          }, 1500)
+        } else {
+          setMessage({ type: 'error', text: data.error || 'Yükleme başarısız' })
+          console.error('Logo upload error:', data)
         }
-        console.log('Logo uploaded successfully:', newLogoPath)
-        
-        // Force refresh of all pages after a short delay
-        setTimeout(() => {
-          window.location.reload()
-        }, 1500)
       } else {
-        const errorMsg = data.error || 'Logo yükleme başarısız'
-        setMessage({ type: 'error', text: errorMsg })
-        console.error('Logo upload failed:', errorMsg)
+        setMessage({ type: 'error', text: data.error || `Yükleme başarısız: ${response.status} ${response.statusText}` })
+        console.error('Logo upload error:', data)
       }
     } catch (error) {
       console.error('Logo upload exception:', error)
@@ -225,30 +207,16 @@ export default function SettingsForm({ settings }: SettingsFormProps) {
             </div>
             <div className="flex-1">
               <form 
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  handleLogoUpload(e)
-                }} 
-                encType="multipart/form-data" 
+                onSubmit={handleLogoUpload} 
                 className="space-y-3"
-                action="#"
-                method="post"
               >
                 <div>
                   <input
                     type="file"
-                    id="logo-upload"
-                    name="logo"
+                    name="file"
                     accept="image/jpeg,image/jpg,image/png,image/svg+xml,image/webp"
                     required
                     className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-90"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) {
-                        console.log('File selected:', { name: file.name, type: file.type, size: file.size })
-                      }
-                    }}
                   />
                   <p className="mt-1 text-sm text-gray-500">
                     PNG, JPG, SVG veya WebP formatında logo yükleyebilirsiniz.
