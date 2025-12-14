@@ -48,6 +48,22 @@ export default function GalleryManager() {
       return
     }
 
+    // Validate file size (10MB limit)
+    const maxSize = 10 * 1024 * 1024 // 10MB
+    if (file.size > maxSize) {
+      setMessage({ type: 'error', text: 'Dosya boyutu çok büyük. Maksimum 10MB olmalıdır.' })
+      setUploading(false)
+      return
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      setMessage({ type: 'error', text: 'Geçersiz dosya tipi. Sadece JPG, PNG ve WebP formatları desteklenir.' })
+      setUploading(false)
+      return
+    }
+
     try {
       const uploadFormData = new FormData()
       uploadFormData.append('file', file)
@@ -57,7 +73,21 @@ export default function GalleryManager() {
         body: uploadFormData,
       })
 
-      const data = await response.json()
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type')
+      let data
+
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json()
+      } else {
+        // If not JSON, try to get text response
+        const text = await response.text()
+        console.error('Non-JSON response:', text)
+        setMessage({ type: 'error', text: `Sunucu hatası: ${response.status} ${response.statusText}` })
+        setUploading(false)
+        return
+      }
+
       console.log('Upload response:', { status: response.status, data })
 
       if (response.ok) {
@@ -76,12 +106,16 @@ export default function GalleryManager() {
           console.error('Upload error:', data)
         }
       } else {
-        setMessage({ type: 'error', text: data.error || 'Yükleme başarısız' })
+        setMessage({ type: 'error', text: data.error || `Yükleme başarısız: ${response.status} ${response.statusText}` })
         console.error('Upload error:', data)
       }
     } catch (error) {
       console.error('Upload exception:', error)
-      setMessage({ type: 'error', text: `Bir hata oluştu: ${error instanceof Error ? error.message : 'Bilinmeyen hata'}` })
+      if (error instanceof SyntaxError && error.message.includes('JSON')) {
+        setMessage({ type: 'error', text: 'Sunucu yanıtı geçersiz. Lütfen tekrar deneyin.' })
+      } else {
+        setMessage({ type: 'error', text: `Bir hata oluştu: ${error instanceof Error ? error.message : 'Bilinmeyen hata'}` })
+      }
     } finally {
       setUploading(false)
     }
