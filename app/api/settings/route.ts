@@ -7,7 +7,14 @@ export async function GET() {
   })
 
   // Filter out /logo.svg since it doesn't exist on Vercel - return null instead
-  if (settings && (settings.logoPath === '/logo.svg' || settings.logoPath?.startsWith('/logo'))) {
+  // Also automatically fix the database if it has /logo.svg
+  if (settings && (settings.logoPath === '/logo.svg' || (settings.logoPath?.startsWith('/logo') && !settings.logoPath.startsWith('http')))) {
+    // Auto-fix: Update database to set logoPath to null
+    await prisma.settings.update({
+      where: { id: 'default' },
+      data: { logoPath: null },
+    })
+    
     return NextResponse.json({
       ...settings,
       logoPath: null,

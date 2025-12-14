@@ -22,11 +22,12 @@ export default function Navigation() {
         })
         const data = await res.json()
         console.log('Fetched logo path:', data.logoPath)
-        // Filter out /logo.svg since it doesn't exist on Vercel - treat as null
-        if (data.logoPath && data.logoPath !== '/logo.svg' && !data.logoPath.startsWith('/logo')) {
+        // Filter out /logo.svg and any local paths - only use blob URLs
+        if (data.logoPath && data.logoPath.startsWith('http')) {
           setLogoPath(data.logoPath)
           setLogoTimestamp(timestamp) // Update timestamp to force refresh
         } else {
+          // Set to null for any local paths or invalid paths
           setLogoPath(null)
         }
       } catch (error) {
