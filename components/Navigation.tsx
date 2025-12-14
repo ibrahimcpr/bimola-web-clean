@@ -22,9 +22,12 @@ export default function Navigation() {
         })
         const data = await res.json()
         console.log('Fetched logo path:', data.logoPath)
-        if (data.logoPath) {
+        // Filter out /logo.svg since it doesn't exist on Vercel - treat as null
+        if (data.logoPath && data.logoPath !== '/logo.svg' && !data.logoPath.startsWith('/logo')) {
           setLogoPath(data.logoPath)
           setLogoTimestamp(timestamp) // Update timestamp to force refresh
+        } else {
+          setLogoPath(null)
         }
       } catch (error) {
         console.error('Error fetching logo:', error)
@@ -67,9 +70,14 @@ export default function Navigation() {
                   className="w-full h-full object-contain"
                   onError={(e) => {
                     console.error('Logo load error:', logoPath)
-                    // If blob URL fails, show placeholder
-                    if (logoPath.startsWith('http')) {
+                    // If logo fails to load, show placeholder or hide it
+                    if (logoPath && logoPath.startsWith('http')) {
+                      // Blob URL failed, try placeholder
                       e.currentTarget.src = '/logo-placeholder.svg'
+                    } else {
+                      // Local path failed, hide image and show placeholder div
+                      e.currentTarget.style.display = 'none'
+                      // The parent will show the placeholder div
                     }
                   }}
                   onLoad={() => {
