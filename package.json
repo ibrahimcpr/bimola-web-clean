@@ -4,9 +4,9 @@
     "private": true,
     "scripts": {
         "dev": "next dev",
-        "build": "npx prisma generate && next build",
-        "postinstall": "npx prisma generate",
-        "vercel-build": "npx prisma generate && npx prisma migrate deploy && next build",
+    "build": "npx prisma generate && next build",
+    "postinstall": "npx prisma generate",
+    "vercel-build": "git submodule update --init --recursive && npx prisma generate && npx prisma migrate deploy && next build",
         "start": "next start",
         "lint": "next lint",
         "db:push": "npx prisma db push",
