@@ -65,12 +65,21 @@ export async function POST(request: NextRequest) {
     })
 
     const logoPath = blob.url
+    console.log('Uploaded logo to blob, URL:', logoPath)
 
     // Update database
     const settings = await prisma.settings.update({
       where: { id: 'default' },
       data: { logoPath: logoPath },
     })
+
+    console.log('Database updated, settings.logoPath:', settings.logoPath)
+
+    // Verify the update
+    const verifySettings = await prisma.settings.findUnique({
+      where: { id: 'default' },
+    })
+    console.log('Verified logoPath in database:', verifySettings?.logoPath)
 
     return NextResponse.json({ success: true, logoPath: logoPath, settings })
   } catch (error) {

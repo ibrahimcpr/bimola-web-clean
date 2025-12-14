@@ -92,17 +92,19 @@ export default function SettingsForm({ settings }: SettingsFormProps) {
         // Check if upload was successful (either success flag or logoPath)
         if (data.success !== false && (data.success || data.logoPath)) {
           const newLogoPath = data.logoPath
+          console.log('Logo upload successful, new path:', newLogoPath)
+          console.log('Settings from response:', data.settings)
+
+          // Update local state immediately
           setLogoPath(newLogoPath)
-          setMessage({ type: 'success', text: 'Logo başarıyla yüklendi!' })
+          setMessage({ type: 'success', text: 'Logo başarıyla yüklendi! Sayfa yenilendiğinde görünecektir.' })
+
           if (e.currentTarget) {
             e.currentTarget.reset()
           }
-          console.log('Logo uploaded successfully:', newLogoPath)
 
-          // Force refresh after a short delay
-          setTimeout(() => {
-            window.location.reload()
-          }, 1500)
+          // Navigation component polls every 3 seconds, so logo will appear automatically
+          // No need to reload the page
         } else {
           setMessage({ type: 'error', text: data.error || 'Yükleme başarısız' })
           console.error('Logo upload error:', data)
@@ -225,8 +227,8 @@ export default function SettingsForm({ settings }: SettingsFormProps) {
         {message && (
           <div
             className={`p-4 rounded ${message.type === 'success'
-                ? 'bg-green-50 text-green-700 border border-green-200'
-                : 'bg-red-50 text-red-700 border border-red-200'
+              ? 'bg-green-50 text-green-700 border border-green-200'
+              : 'bg-red-50 text-red-700 border border-red-200'
               }`}
           >
             {message.text}
