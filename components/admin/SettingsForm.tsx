@@ -217,9 +217,11 @@ export default function SettingsForm({ settings }: SettingsFormProps) {
                   <span className="text-secondary text-sm font-bold">Logo Yok</span>
                 </div>
               )}
-              <p className="text-xs text-gray-500 mt-1 text-center max-w-24 truncate">
-                {logoPath.replace('/uploads/logo/', '')}
-              </p>
+              {logoPath && (
+                <p className="text-xs text-gray-500 mt-1 text-center max-w-24 truncate">
+                  {logoPath.replace(/^.*\//, '').substring(0, 20)}
+                </p>
+              )}
             </div>
             <div className="flex-1">
               <form 
