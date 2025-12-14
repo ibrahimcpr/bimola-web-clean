@@ -21,7 +21,11 @@ export default async function RootLayout({
     where: { id: 'default' },
   })
 
-        const logoPath = settings?.logoPath || null
+  // Filter out /logo.svg since it doesn't exist on Vercel - return null instead
+  let logoPath = settings?.logoPath || null
+  if (logoPath === '/logo.svg' || logoPath?.startsWith('/logo')) {
+    logoPath = null
+  }
 
         return (
           <html lang="tr">
