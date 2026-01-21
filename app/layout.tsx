@@ -21,12 +21,11 @@ export default async function RootLayout({
     where: { id: 'default' },
   })
 
-  // Filter out /logo.svg since it doesn't exist on Vercel - return null instead
-  // Only use blob URLs (starting with http)
+  // Filter out blob URLs and invalid paths - only use local paths
   let logoPath = settings?.logoPath || null
   if (logoPath) {
-    // Only filter local paths, NOT blob URLs
-    if (logoPath === '/logo.svg' || (logoPath.startsWith('/logo') && !logoPath.startsWith('http'))) {
+    // Filter out blob URLs (no longer supported)
+    if (logoPath.includes('blob.vercel-storage.com')) {
       // Auto-fix: Update database to set logoPath to null
       await prisma.settings.update({
         where: { id: 'default' },
@@ -34,8 +33,12 @@ export default async function RootLayout({
       })
       logoPath = null
     }
-    // If it's not a blob URL and not a local /logo path, also filter it out
-    else if (!logoPath.startsWith('http')) {
+    // Filter out invalid local paths
+    else if (logoPath === '/logo.svg' || (logoPath.startsWith('/logo') && !logoPath.startsWith('/'))) {
+      logoPath = null
+    }
+    // Only accept local paths starting with /
+    else if (!logoPath.startsWith('/')) {
       logoPath = null
     }
   }

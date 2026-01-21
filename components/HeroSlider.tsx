@@ -61,20 +61,29 @@ export default function HeroSlider({ images }: HeroSliderProps) {
             className="absolute inset-0 w-full h-full"
           >
             {imagePath.startsWith('http') || imagePath.startsWith('https') ? (
-              <img
-                src={imagePath}
-                alt={`Galeri ${currentIndex + 1}`}
-                className="absolute inset-0 w-full h-full object-cover"
-                loading="eager"
-                onLoad={() => {
-                  console.log('Gallery image loaded successfully:', imagePath)
-                  setIsLoaded(true)
-                }}
-                onError={(e) => {
-                  console.error('Failed to load gallery image:', imagePath)
-                  console.error('Error details:', e)
-                }}
-              />
+              // Check if it's a blob URL - don't load those
+              imagePath.includes('blob.vercel-storage.com') ? (
+                <div className="absolute inset-0 w-full h-full bg-gray-200 flex items-center justify-center">
+                  <p className="text-gray-500">Görsel yüklenemedi</p>
+                </div>
+              ) : (
+                <img
+                  src={imagePath}
+                  alt={`Galeri ${currentIndex + 1}`}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="eager"
+                  onLoad={() => {
+                    console.log('Gallery image loaded successfully:', imagePath)
+                    setIsLoaded(true)
+                  }}
+                  onError={(e) => {
+                    console.error('Failed to load gallery image:', imagePath)
+                    // Hide image and show placeholder
+                    e.currentTarget.style.display = 'none'
+                    setIsLoaded(true)
+                  }}
+                />
+              )
             ) : (
               <Image
                 src={imagePath}
@@ -99,11 +108,10 @@ export default function HeroSlider({ images }: HeroSliderProps) {
             <button
               key={index}
               onClick={() => setCurrentIndex(index)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index === currentIndex
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentIndex
                   ? 'bg-secondary w-8'
                   : 'bg-white/50 hover:bg-white/75'
-              }`}
+                }`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}

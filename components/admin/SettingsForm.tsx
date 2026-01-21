@@ -30,7 +30,11 @@ export default function SettingsForm({ settings }: SettingsFormProps) {
   const [loading, setLoading] = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
-  const [logoPath, setLogoPath] = useState(settings?.logoPath || null)
+  // Filter out blob URLs - only show local paths
+  const initialLogoPath = settings?.logoPath && !settings.logoPath.includes('blob.vercel-storage.com')
+    ? settings.logoPath
+    : null
+  const [logoPath, setLogoPath] = useState(initialLogoPath)
 
   const handleLogoUpload = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -177,10 +181,8 @@ export default function SettingsForm({ settings }: SettingsFormProps) {
                 className="w-24 h-24 object-contain border border-gray-200 rounded-lg p-2"
                 onError={(e) => {
                   console.error('Logo load error:', logoPath)
-                  // If blob URL fails, show placeholder
-                  if (logoPath.startsWith('http')) {
-                    e.currentTarget.src = '/logo-placeholder.svg'
-                  }
+                  // Hide image on error - placeholder div will show
+                  e.currentTarget.style.display = 'none'
                 }}
               />
             ) : (

@@ -166,11 +166,10 @@ export default function GalleryManager() {
     <div className="space-y-6">
       {message && (
         <div
-          className={`p-4 rounded ${
-            message.type === 'success'
+          className={`p-4 rounded ${message.type === 'success'
               ? 'bg-green-50 text-green-700 border border-green-200'
               : 'bg-red-50 text-red-700 border border-red-200'
-          }`}
+            }`}
         >
           {message.text}
         </div>
@@ -224,12 +223,23 @@ export default function GalleryManager() {
                   className="relative group border rounded-lg overflow-hidden"
                 >
                   <div className="relative aspect-video">
-                    <Image
-                      src={image.path}
-                      alt={`Galeri ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
+                    {image.path.includes('blob.vercel-storage.com') ? (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <p className="text-gray-500 text-sm">Görsel yüklenemedi</p>
+                      </div>
+                    ) : (
+                      <Image
+                        src={image.path}
+                        alt={`Galeri ${index + 1}`}
+                        fill
+                        className="object-cover"
+                        onError={(e) => {
+                          console.error('Failed to load gallery image:', image.path)
+                          // Next Image component doesn't support onError the same way
+                          // The error will be handled by the parent check
+                        }}
+                      />
+                    )}
                   </div>
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center space-x-2">
                     <button

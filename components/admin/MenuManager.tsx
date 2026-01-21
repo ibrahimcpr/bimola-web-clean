@@ -131,21 +131,37 @@ export default function MenuManager() {
               Mevcut menü görseli: <span className="font-medium">{menu.imagePath}</span>
             </p>
             <div className="mt-4">
-              <img
-                src={menu.imagePath}
-                alt="Aktif Menü"
-                className="max-w-full h-auto rounded-lg border border-gray-200"
-                style={{ maxHeight: '400px' }}
-              />
+              {menu.imagePath.includes('blob.vercel-storage.com') ? (
+                <div className="w-full h-64 flex items-center justify-center bg-gray-200 rounded-lg border border-gray-200">
+                  <p className="text-gray-500">Menü görseli yüklenemedi</p>
+                </div>
+              ) : (
+                <img
+                  src={menu.imagePath}
+                  alt="Aktif Menü"
+                  className="max-w-full h-auto rounded-lg border border-gray-200"
+                  style={{ maxHeight: '400px' }}
+                  onError={(e) => {
+                    console.error('Failed to load menu image:', menu.imagePath)
+                    e.currentTarget.style.display = 'none'
+                    const placeholder = document.createElement('div')
+                    placeholder.className = 'w-full h-64 flex items-center justify-center bg-gray-200 rounded-lg border border-gray-200'
+                    placeholder.innerHTML = '<p class="text-gray-500">Menü görseli yüklenemedi</p>'
+                    e.currentTarget.parentElement?.appendChild(placeholder)
+                  }}
+                />
+              )}
             </div>
-            <a
-              href={menu.imagePath}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block px-4 py-2 bg-secondary text-white rounded-md hover:bg-opacity-90 transition-all duration-200"
-            >
-              Menüyü Görüntüle
-            </a>
+            {!menu.imagePath.includes('blob.vercel-storage.com') && (
+              <a
+                href={menu.imagePath}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block px-4 py-2 bg-secondary text-white rounded-md hover:bg-opacity-90 transition-all duration-200"
+              >
+                Menüyü Görüntüle
+              </a>
+            )}
           </div>
         </motion.div>
       )}
