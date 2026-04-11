@@ -82,8 +82,8 @@ export default function MenuManager() {
       {message && (
         <div
           className={`p-4 rounded ${message.type === 'success'
-              ? 'bg-green-50 text-green-700 border border-green-200'
-              : 'bg-red-50 text-red-700 border border-red-200'
+            ? 'bg-green-50 text-green-700 border border-green-200'
+            : 'bg-red-50 text-red-700 border border-red-200'
             }`}
         >
           {message.text}
@@ -137,7 +137,7 @@ export default function MenuManager() {
                   className="w-full rounded-lg border border-gray-200"
                   style={{ height: '400px' }}
                 >
-                  <a href={menu.imagePath} target="_blank" rel="noopener noreferrer" className="text-primary underline">PDF'i Aç</a>
+                  <a href={menu.imagePath} target="_blank" rel="noopener noreferrer" className="text-primary underline">PDF&apos;i Aç</a>
                 </object>
               ) : (
                 <img

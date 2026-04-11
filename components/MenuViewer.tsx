@@ -65,7 +65,7 @@ export default function MenuViewer({ imagePath }: MenuViewerProps) {
                 rel="noopener noreferrer"
                 className="px-4 py-2 bg-primary text-white rounded-md hover:bg-opacity-90"
               >
-                PDF'i Aç
+                PDF&apos;i Aç
               </a>
             </div>
           </object>
