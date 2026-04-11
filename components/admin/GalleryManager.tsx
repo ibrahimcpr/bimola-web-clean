@@ -2,7 +2,6 @@
 
 import { useState, useEffect, FormEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import Image from 'next/image'
 
 interface GalleryImage {
   id: string
@@ -223,11 +222,10 @@ export default function GalleryManager() {
                   className="relative group border rounded-lg overflow-hidden"
                 >
                   <div className="relative aspect-video">
-                    <Image
+                    <img
                       src={image.path}
                       alt={`Galeri ${index + 1}`}
-                      fill
-                      className="object-cover"
+                      className="absolute inset-0 w-full h-full object-cover"
                     />
                   </div>
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center space-x-2">

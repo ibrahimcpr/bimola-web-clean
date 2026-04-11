@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import Image from 'next/image'
 
 interface GalleryImage {
   id: string
@@ -55,12 +54,10 @@ export default function HeroSlider({ images }: HeroSliderProps) {
             transition={{ duration: 0.8, ease: 'easeInOut' }}
             className="absolute inset-0 w-full h-full"
           >
-            <Image
+            <img
               src={imagePath}
               alt={`Galeri ${currentIndex + 1}`}
-              fill
-              className="object-cover"
-              priority={currentIndex === 0}
+              className="absolute inset-0 w-full h-full object-cover"
             />
           </motion.div>
         </AnimatePresence>
