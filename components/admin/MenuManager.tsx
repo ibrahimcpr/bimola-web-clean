@@ -102,11 +102,11 @@ export default function MenuManager() {
             <input
               type="file"
               name="file"
-              accept="image/jpeg,image/jpg"
+              accept="image/jpeg,image/jpg,application/pdf"
               required
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-90"
             />
-            <p className="mt-2 text-sm text-gray-500">Sadece JPEG formatı kabul edilir.</p>
+            <p className="mt-2 text-sm text-gray-500">JPEG veya PDF formatı kabul edilir.</p>
           </div>
           <button
             type="submit"
@@ -128,32 +128,26 @@ export default function MenuManager() {
           <h2 className="text-xl font-semibold mb-4">Aktif Menü</h2>
           <div className="space-y-4">
             <p className="text-gray-600">
-              Mevcut menü görseli: <span className="font-medium">{menu.imagePath}</span>
+              Mevcut menü: <span className="font-medium">{menu.imagePath.split('/').pop()}</span>
             </p>
             <div className="mt-4">
-              {menu.imagePath.includes('blob.vercel-storage.com') ? (
-                <div className="w-full h-64 flex items-center justify-center bg-gray-200 rounded-lg border border-gray-200">
-                  <p className="text-gray-500">Menü görseli yüklenemedi</p>
-                </div>
+              {menu.imagePath.endsWith('.pdf') ? (
+                <iframe
+                  src={menu.imagePath}
+                  className="w-full rounded-lg border border-gray-200"
+                  style={{ height: '400px' }}
+                  title="Menü PDF"
+                />
               ) : (
                 <img
                   src={menu.imagePath}
                   alt="Aktif Menü"
                   className="max-w-full h-auto rounded-lg border border-gray-200"
                   style={{ maxHeight: '400px' }}
-                  onError={(e) => {
-                    console.error('Failed to load menu image:', menu.imagePath)
-                    e.currentTarget.style.display = 'none'
-                    const placeholder = document.createElement('div')
-                    placeholder.className = 'w-full h-64 flex items-center justify-center bg-gray-200 rounded-lg border border-gray-200'
-                    placeholder.innerHTML = '<p class="text-gray-500">Menü görseli yüklenemedi</p>'
-                    e.currentTarget.parentElement?.appendChild(placeholder)
-                  }}
                 />
               )}
             </div>
-            {!menu.imagePath.includes('blob.vercel-storage.com') && (
-              <a
+            <a
                 href={menu.imagePath}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -161,7 +155,6 @@ export default function MenuManager() {
               >
                 Menüyü Görüntüle
               </a>
-            )}
           </div>
         </motion.div>
       )}

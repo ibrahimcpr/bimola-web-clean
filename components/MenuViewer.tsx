@@ -49,14 +49,27 @@ export default function MenuViewer({ imagePath }: MenuViewerProps) {
       transition={{ duration: 0.6 }}
       className="bg-white rounded-lg shadow-lg overflow-hidden"
     >
-      <div className="w-full border border-gray-200 rounded-lg overflow-hidden bg-gray-100">
-        <img
-          src={imagePath}
-          alt="Bi Mola Menü"
-          className="w-full h-auto"
-          style={{ maxHeight: '80vh', objectFit: 'contain' }}
-        />
-      </div>
+      {imagePath.endsWith('.pdf') ? (
+        <div className="w-full">
+          <iframe
+            src={imagePath}
+            className="w-full rounded-lg border border-gray-200"
+            style={{ height: '80vh', minHeight: '600px' }}
+            onLoad={() => setIsLoaded(true)}
+            title="Bi Mola Menü"
+          />
+        </div>
+      ) : (
+        <div className="w-full border border-gray-200 rounded-lg overflow-hidden bg-gray-100">
+          <img
+            src={imagePath}
+            alt="Bi Mola Menü"
+            className="w-full h-auto"
+            style={{ maxHeight: '80vh', objectFit: 'contain' }}
+            onLoad={() => setIsLoaded(true)}
+          />
+        </div>
+      )}
       <div className="mt-4 text-center">
         <a
           href={imagePath}

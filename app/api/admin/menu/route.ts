@@ -31,10 +31,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Dosya bulunamadı' }, { status: 400 })
     }
 
-    const allowedTypes = ['image/jpeg', 'image/jpg']
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'application/pdf']
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: 'Sadece JPEG formatı kabul edilir.' },
+        { error: 'Sadece JPEG ve PDF formatları kabul edilir.' },
         { status: 400 }
       )
     }
@@ -56,7 +56,8 @@ export async function POST(request: NextRequest) {
     const uploadDir = join(process.cwd(), 'public', 'uploads', 'menu')
     await mkdir(uploadDir, { recursive: true })
 
-    const filename = `menu-${Date.now()}.jpg`
+    const isPdf = file.type === 'application/pdf'
+    const filename = isPdf ? `menu-${Date.now()}.pdf` : `menu-${Date.now()}.jpg`
     const filePath = join(uploadDir, filename)
 
     const bytes = await file.arrayBuffer()
