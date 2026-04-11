@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   images: {
-    domains: ['localhost'],
     remotePatterns: [],
     formats: ['image/avif', 'image/webp'],
   },

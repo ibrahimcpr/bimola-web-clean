@@ -30,10 +30,7 @@ export default function SettingsForm({ settings }: SettingsFormProps) {
   const [loading, setLoading] = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
-  // Filter out blob URLs - only show local paths
-  const initialLogoPath = settings?.logoPath && !settings.logoPath.includes('blob.vercel-storage.com')
-    ? settings.logoPath
-    : null
+  const initialLogoPath = settings?.logoPath?.startsWith('/uploads/') ? settings.logoPath : null
   const [logoPath, setLogoPath] = useState(initialLogoPath)
 
   const handleLogoUpload = async (e: FormEvent<HTMLFormElement>) => {

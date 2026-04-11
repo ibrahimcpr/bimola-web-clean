@@ -6,12 +6,13 @@
         "dev": "next dev",
         "build": "npx prisma generate && next build",
         "postinstall": "npx prisma generate",
-        "vercel-build": "npx prisma generate && npx prisma migrate deploy && next build",
         "start": "next start",
         "lint": "next lint",
         "db:push": "npx prisma db push",
+        "db:migrate": "npx prisma migrate deploy",
         "db:studio": "npx prisma studio",
-        "db:seed": "tsx prisma/seed.ts"
+        "db:seed": "tsx prisma/seed.ts",
+        "deploy": "npx prisma migrate deploy && next build"
     },
     "dependencies": {
         "@prisma/client": "^5.7.1",

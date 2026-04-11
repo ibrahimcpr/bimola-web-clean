@@ -13,8 +13,6 @@ export default async function HomePage() {
     orderBy: { order: 'asc' },
   })
 
-  console.log('HomePage - Fetched gallery images:', galleryImages.length, galleryImages)
-
   return (
     <div className="min-h-screen">
       <HeroSlider images={galleryImages} />

@@ -21,26 +21,10 @@ export default async function RootLayout({
     where: { id: 'default' },
   })
 
-  // Filter out blob URLs and invalid paths - only use local paths
+  // Only accept local /uploads/ paths
   let logoPath = settings?.logoPath || null
-  if (logoPath) {
-    // Filter out blob URLs (no longer supported)
-    if (logoPath.includes('blob.vercel-storage.com')) {
-      // Auto-fix: Update database to set logoPath to null
-      await prisma.settings.update({
-        where: { id: 'default' },
-        data: { logoPath: null },
-      })
-      logoPath = null
-    }
-    // Filter out invalid local paths
-    else if (logoPath === '/logo.svg' || (logoPath.startsWith('/logo') && !logoPath.startsWith('/'))) {
-      logoPath = null
-    }
-    // Only accept local paths starting with /
-    else if (!logoPath.startsWith('/')) {
-      logoPath = null
-    }
+  if (logoPath && !logoPath.startsWith('/uploads/')) {
+    logoPath = null
   }
 
   return (

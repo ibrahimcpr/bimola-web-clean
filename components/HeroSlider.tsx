@@ -16,18 +16,13 @@ interface HeroSliderProps {
 
 export default function HeroSlider({ images }: HeroSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
-    console.log('HeroSlider received images:', images)
-    if (images.length === 0) {
-      console.log('No images to display')
-      return
-    }
+    if (images.length === 0) return
 
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % images.length)
-    }, 5000) // Change image every 5 seconds
+    }, 5000)
 
     return () => clearInterval(interval)
   }, [images.length, images])
@@ -60,43 +55,13 @@ export default function HeroSlider({ images }: HeroSliderProps) {
             transition={{ duration: 0.8, ease: 'easeInOut' }}
             className="absolute inset-0 w-full h-full"
           >
-            {imagePath.startsWith('http') || imagePath.startsWith('https') ? (
-              // Check if it's a blob URL - don't load those
-              imagePath.includes('blob.vercel-storage.com') ? (
-                <div className="absolute inset-0 w-full h-full bg-gray-200 flex items-center justify-center">
-                  <p className="text-gray-500">Görsel yüklenemedi</p>
-                </div>
-              ) : (
-                <img
-                  src={imagePath}
-                  alt={`Galeri ${currentIndex + 1}`}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  loading="eager"
-                  onLoad={() => {
-                    console.log('Gallery image loaded successfully:', imagePath)
-                    setIsLoaded(true)
-                  }}
-                  onError={(e) => {
-                    console.error('Failed to load gallery image:', imagePath)
-                    // Hide image and show placeholder
-                    e.currentTarget.style.display = 'none'
-                    setIsLoaded(true)
-                  }}
-                />
-              )
-            ) : (
-              <Image
-                src={imagePath}
-                alt={`Galeri ${currentIndex + 1}`}
-                fill
-                className="object-cover"
-                priority={currentIndex === 0}
-                onLoad={() => {
-                  console.log('Local gallery image loaded:', imagePath)
-                  setIsLoaded(true)
-                }}
-              />
-            )}
+            <Image
+              src={imagePath}
+              alt={`Galeri ${currentIndex + 1}`}
+              fill
+              className="object-cover"
+              priority={currentIndex === 0}
+            />
           </motion.div>
         </AnimatePresence>
       )}
@@ -109,8 +74,8 @@ export default function HeroSlider({ images }: HeroSliderProps) {
               key={index}
               onClick={() => setCurrentIndex(index)}
               className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentIndex
-                  ? 'bg-secondary w-8'
-                  : 'bg-white/50 hover:bg-white/75'
+                ? 'bg-secondary w-8'
+                : 'bg-white/50 hover:bg-white/75'
                 }`}
               aria-label={`Go to slide ${index + 1}`}
             />
