@@ -22,27 +22,26 @@ export default function Navigation() {
         })
         const data = await res.json()
         console.log('Fetched logo path:', data.logoPath)
-        // Filter out /logo.svg and any local paths - only use blob URLs
-        if (data.logoPath && data.logoPath.startsWith('http')) {
+        // Only accept local /uploads/ paths
+        if (data.logoPath && data.logoPath.startsWith('/uploads/')) {
           setLogoPath(data.logoPath)
-          setLogoTimestamp(timestamp) // Update timestamp to force refresh
+          setLogoTimestamp(timestamp)
         } else {
-          // Set to null for any local paths or invalid paths
           setLogoPath(null)
         }
       } catch (error) {
         console.error('Error fetching logo:', error)
       }
     }
-    
+
     // Fetch immediately on mount
     fetchLogo()
-    
+
     // Refresh logo every 3 seconds in case it was updated
     const interval = setInterval(() => {
       fetchLogo()
     }, 3000)
-    
+
     return () => clearInterval(interval)
   }, [])
 
