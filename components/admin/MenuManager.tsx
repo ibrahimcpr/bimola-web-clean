@@ -81,11 +81,10 @@ export default function MenuManager() {
     <div className="space-y-6">
       {message && (
         <div
-          className={`p-4 rounded ${
-            message.type === 'success'
+          className={`p-4 rounded ${message.type === 'success'
               ? 'bg-green-50 text-green-700 border border-green-200'
               : 'bg-red-50 text-red-700 border border-red-200'
-          }`}
+            }`}
         >
           {message.text}
         </div>
@@ -102,11 +101,11 @@ export default function MenuManager() {
             <input
               type="file"
               name="file"
-              accept="image/jpeg,image/jpg,application/pdf"
+              accept="application/pdf"
               required
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-opacity-90"
             />
-            <p className="mt-2 text-sm text-gray-500">JPEG veya PDF formatı kabul edilir.</p>
+            <p className="mt-2 text-sm text-gray-500">Sadece PDF formatı kabul edilir.</p>
           </div>
           <button
             type="submit"
@@ -132,12 +131,14 @@ export default function MenuManager() {
             </p>
             <div className="mt-4">
               {menu.imagePath.endsWith('.pdf') ? (
-                <iframe
-                  src={menu.imagePath}
+                <object
+                  data={menu.imagePath}
+                  type="application/pdf"
                   className="w-full rounded-lg border border-gray-200"
                   style={{ height: '400px' }}
-                  title="Menü PDF"
-                />
+                >
+                  <a href={menu.imagePath} target="_blank" rel="noopener noreferrer" className="text-primary underline">PDF'i Aç</a>
+                </object>
               ) : (
                 <img
                   src={menu.imagePath}
@@ -148,13 +149,13 @@ export default function MenuManager() {
               )}
             </div>
             <a
-                href={menu.imagePath}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block px-4 py-2 bg-secondary text-white rounded-md hover:bg-opacity-90 transition-all duration-200"
-              >
-                Menüyü Görüntüle
-              </a>
+              href={menu.imagePath}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-4 py-2 bg-secondary text-white rounded-md hover:bg-opacity-90 transition-all duration-200"
+            >
+              Menüyü Görüntüle
+            </a>
           </div>
         </motion.div>
       )}

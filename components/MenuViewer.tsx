@@ -51,13 +51,24 @@ export default function MenuViewer({ imagePath }: MenuViewerProps) {
     >
       {imagePath.endsWith('.pdf') ? (
         <div className="w-full">
-          <iframe
-            src={imagePath}
+          <object
+            data={imagePath}
+            type="application/pdf"
             className="w-full rounded-lg border border-gray-200"
             style={{ height: '80vh', minHeight: '600px' }}
-            onLoad={() => setIsLoaded(true)}
-            title="Bi Mola Menü"
-          />
+          >
+            <div className="w-full h-64 flex flex-col items-center justify-center bg-gray-100 rounded-lg border border-gray-200 gap-4">
+              <p className="text-gray-600">PDF görüntüleyici desteklenmiyor.</p>
+              <a
+                href={imagePath}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-opacity-90"
+              >
+                PDF'i Aç
+              </a>
+            </div>
+          </object>
         </div>
       ) : (
         <div className="w-full border border-gray-200 rounded-lg overflow-hidden bg-gray-100">
