@@ -1,49 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
-  const [logoPath, setLogoPath] = useState<string | null>(null)
-  const [logoTimestamp, setLogoTimestamp] = useState(Date.now())
-
-  useEffect(() => {
-    // Fetch logo path from settings immediately
-    const fetchLogo = async () => {
-      try {
-        const timestamp = Date.now()
-        const res = await fetch(`/api/settings?t=${timestamp}`, {
-          cache: 'no-store',
-          headers: {
-            'Cache-Control': 'no-cache',
-          },
-        })
-        const data = await res.json()
-        console.log('Fetched logo path:', data.logoPath)
-        // Only accept local /uploads/ paths
-        if (data.logoPath && data.logoPath.startsWith('/uploads/')) {
-          setLogoPath(data.logoPath)
-          setLogoTimestamp(timestamp)
-        } else {
-          setLogoPath(null)
-        }
-      } catch (error) {
-        console.error('Error fetching logo:', error)
-      }
-    }
-
-    // Fetch immediately on mount
-    fetchLogo()
-
-    // Refresh logo every 3 seconds in case it was updated
-    const interval = setInterval(() => {
-      fetchLogo()
-    }, 3000)
-
-    return () => clearInterval(interval)
-  }, [])
 
   const navItems = [
     { href: '/', label: 'Ana Sayfa' },
@@ -62,33 +24,11 @@ export default function Navigation() {
               whileTap={{ scale: 0.95 }}
               className="relative w-16 h-16"
             >
-              {logoPath ? (
-                <img
-                  key={logoTimestamp}
-                  src={`${logoPath}?t=${logoTimestamp}`}
-                  alt="Bi Mola Logo"
-                  className="w-full h-full object-contain"
-                  onError={(e) => {
-                    console.error('Logo load error:', logoPath)
-                    // If logo fails to load, show placeholder or hide it
-                    if (logoPath && logoPath.startsWith('http')) {
-                      // Blob URL failed, try placeholder
-                      e.currentTarget.src = '/logo-placeholder.svg'
-                    } else {
-                      // Local path failed, hide image and show placeholder div
-                      e.currentTarget.style.display = 'none'
-                      // The parent will show the placeholder div
-                    }
-                  }}
-                  onLoad={() => {
-                    console.log('Logo loaded successfully:', logoPath)
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full bg-primary rounded-lg flex items-center justify-center">
-                  <span className="text-secondary text-xl font-bold">BM</span>
-                </div>
-              )}
+              <img
+                src="/logo.jpg"
+                alt="Bi Mola Logo"
+                className="w-full h-full object-contain"
+              />
             </motion.div>
             <span className="text-2xl font-bold text-primary">Bi Mola</span>
           </Link>

@@ -30,12 +30,8 @@ export default async function RootLayout({
   return (
     <html lang="tr">
       <head>
-        {logoPath && (
-          <>
-            <link rel="icon" href={logoPath} />
-            <link rel="apple-touch-icon" href={logoPath} />
-          </>
-        )}
+        <link rel="icon" href="/logo.jpg" />
+        <link rel="apple-touch-icon" href="/logo.jpg" />
       </head>
       <body className={inter.className}>
         <Navigation />
