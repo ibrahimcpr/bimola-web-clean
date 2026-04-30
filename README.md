@@ -14,15 +14,41 @@ Modern, production-ready website for Bi Mola restaurant/café built with Next.js
 - ✨ Smooth animations using Framer Motion
 - 🇹🇷 Turkish UI labels throughout
 
-## Tech Stack
+## Finance Management System
 
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Database**: SQLite with Prisma ORM
-- **Animations**: Framer Motion
-- **Maps**: React Leaflet with OpenStreetMap
-- **Authentication**: Server-side sessions with HttpOnly cookies
+The website includes an integrated income-expense tracking system with Telegram bot integration.
+
+### Features
+
+- 📱 Telegram bot for easy income/expense entry
+- 📊 Admin dashboard with charts and reports
+- 🔒 Secure access with authorized user management
+- 📈 Monthly and category-based analytics
+- 🔔 Automatic missing entry notifications
+
+### Telegram Bot Setup
+
+1. Create a Telegram bot via [@BotFather](https://t.me/botfather)
+2. Get your bot token
+3. Add to `.env`:
+   ```env
+   TELEGRAM_BOT_TOKEN="your_bot_token"
+   AUTHORIZED_TELEGRAM_USER_IDS="user_id_1,user_id_2,user_id_3"
+   ```
+
+4. Start the bot:
+   ```bash
+   npm run bot
+   ```
+
+### Finance Reports
+
+Access the finance reports in the admin panel at `/admin/finance-reports`.
+
+- Monthly overview charts
+- Category breakdown
+- Filterable data (last 3/6/12 months, current/last month)
+- Turkish month names and TL currency formatting
 
 ## Prerequisites
 

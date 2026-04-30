@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -53,5 +53,26 @@ model Session {
   sessionId String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+
+model FinanceRecord {
+  id          String   @id @default(cuid())
+  record_type String
+  category    String
+  amount      Float
+  record_date DateTime
+  month       Int
+  year        Int
+  created_by  String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
+model AuthorizedUser {
+  id               String   @id @default(cuid())
+  telegram_user_id String   @unique
+  name             String
+  is_active        Boolean  @default(true)
+  created_at       DateTime @default(now())
 }
 

@@ -44,6 +44,27 @@ async function main() {
     },
   })
 
+  // Create sample authorized users (update with real Telegram user IDs)
+  await prisma.authorizedUser.upsert({
+    where: { telegram_user_id: '123456789' },
+    update: {},
+    create: {
+      telegram_user_id: '123456789',
+      name: 'Admin User 1',
+      is_active: true,
+    },
+  })
+
+  await prisma.authorizedUser.upsert({
+    where: { telegram_user_id: '987654321' },
+    update: {},
+    create: {
+      telegram_user_id: '987654321',
+      name: 'Admin User 2',
+      is_active: true,
+    },
+  })
+
   console.log('Database seeded successfully!')
 }
 
