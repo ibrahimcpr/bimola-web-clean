@@ -9,6 +9,7 @@ interface MonthlyData {
     totalIncome: number
     totalExpense: number
     netProfit: number
+    monthName?: string
 }
 
 interface CategoryData {
