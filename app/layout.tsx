@@ -7,6 +7,8 @@ import { prisma } from '@/lib/prisma'
 
 const inter = Inter({ subsets: ['latin'] })
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Bi Mola - El Açması Gözleme ve Mantı',
   description: 'Bi Mola, el açması gözleme ve mantısıyla sıcak ve samimi bir mola noktasıdır.',
