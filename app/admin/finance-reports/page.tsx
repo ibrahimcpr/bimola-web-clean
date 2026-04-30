@@ -248,7 +248,7 @@ export default function FinanceReportsPage() {
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="monthName" />
                             <YAxis />
-                            <Tooltip formatter={(value: number) => `${value.toFixed(2)} TL`} />
+                            <Tooltip formatter={(value: any) => value ? `${Number(value).toFixed(2)} TL` : '0 TL'} />
                             <Legend />
                             <Line type="monotone" dataKey="totalIncome" stroke="#10b981" name="Toplam Gelir" />
                             <Line type="monotone" dataKey="totalExpense" stroke="#ef4444" name="Toplam Gider" />
@@ -265,7 +265,7 @@ export default function FinanceReportsPage() {
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="category" />
                             <YAxis />
-                            <Tooltip formatter={(value: number) => `${value.toFixed(2)} TL`} />
+                            <Tooltip formatter={(value: any) => value ? `${Number(value).toFixed(2)} TL` : '0 TL'} />
                             <Bar dataKey="total" fill="#10b981" />
                         </BarChart>
                     </ResponsiveContainer>
@@ -279,7 +279,7 @@ export default function FinanceReportsPage() {
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="category" />
                             <YAxis />
-                            <Tooltip formatter={(value: number) => `${value.toFixed(2)} TL`} />
+                            <Tooltip formatter={(value: any) => value ? `${Number(value).toFixed(2)} TL` : '0 TL'} />
                             <Bar dataKey="total" fill="#ef4444" />
                         </BarChart>
                     </ResponsiveContainer>
