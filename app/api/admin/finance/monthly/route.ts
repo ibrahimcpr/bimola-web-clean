@@ -5,6 +5,17 @@ const prisma = new PrismaClient();
 
 export const dynamic = 'force-dynamic';
 
+function parseDateOnlyUTC(value: string): Date | null {
+    // Expect YYYY-MM-DD
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+    if (!match) return null;
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    const dt = new Date(Date.UTC(year, month - 1, day));
+    return Number.isNaN(dt.getTime()) ? null : dt;
+}
+
 export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
@@ -22,9 +33,22 @@ export async function GET(request: NextRequest) {
             whereClause.month = parseInt(month);
         }
         if (startDate && endDate) {
+            const start = parseDateOnlyUTC(startDate);
+            const end = parseDateOnlyUTC(endDate);
+            if (!start || !end) {
+                return NextResponse.json(
+                    { error: 'Invalid date range. Use YYYY-MM-DD for startDate/endDate.' },
+                    { status: 400 }
+                );
+            }
+
+            // Make endDate inclusive by converting it to an exclusive upper bound (next day at 00:00 UTC)
+            const endExclusive = new Date(end.getTime());
+            endExclusive.setUTCDate(endExclusive.getUTCDate() + 1);
+
             whereClause.record_date = {
-                gte: new Date(startDate),
-                lte: new Date(endDate),
+                gte: start,
+                lt: endExclusive,
             };
         }
 
