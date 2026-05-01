@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
 
         const records = await prisma.financeRecord.findMany({
             where: whereClause,
-            orderBy: { year: 'asc', month: 'asc' },
+            orderBy: [{ year: 'asc' }, { month: 'asc' }],
         });
 
         // Group by month/year
