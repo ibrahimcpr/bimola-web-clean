@@ -59,6 +59,7 @@ export async function GET(request: NextRequest) {
 
         // Group by month/year
         const monthlyData: Record<string, any> = records.reduce((acc, record) => {
+            const key = `${record.year}-${record.month}`;
             if (!acc[key]) {
                 acc[key] = { year: record.year, month: record.month, totalIncome: 0, totalExpense: 0 };
             }
