@@ -4,7 +4,16 @@ import { createSession } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json()
+    const body = await request.json().catch(() => null)
+
+    if (!body || !body.email || !body.password) {
+      return NextResponse.json(
+        { error: 'Invalid request body' },
+        { status: 400 }
+      )
+    }
+
+    const { email, password } = body
 
     const adminEmail = process.env.ADMIN_EMAIL
     const adminPassword = process.env.ADMIN_PASSWORD
@@ -35,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     const sessionId = await createSession()
-    const cookieStore = await cookies()
+    const cookieStore = cookies()
 
     cookieStore.set('session', sessionId, {
       httpOnly: true,
