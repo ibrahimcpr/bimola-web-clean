@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
 
         // Group by category and type
         const categoryData: Record<string, any> = records.reduce((acc, record) => {
+            const key = `${record.record_type}-${record.category}`;
             if (!acc[key]) {
                 acc[key] = { record_type: record.record_type, category: record.category, total: 0 };
             }
