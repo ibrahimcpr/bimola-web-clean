@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
         });
 
         // Calculate summary
-        const summary = records.reduce(
+        const summary: { totalIncome: number; totalExpense: number } = records.reduce(
             (acc, record) => {
                 if (record.record_type === 'income') {
                     acc.totalIncome += record.amount;
