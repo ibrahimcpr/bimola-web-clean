@@ -40,7 +40,7 @@ const mainMenu = {
 const incomeCategories = ['Nakit Geliri', 'Kredi Kartı Geliri', 'Trendyol Geliri', 'Yemek Kartı Geliri'];
 
 // Expense categories
-const expenseCategories = ['Kira Gideri', 'Market Gideri', 'Eker Gideri', 'Faturalar', 'Diğer Gider'];
+const expenseCategories = ['Kira Gideri', 'Market Gideri', 'Eker Gideri', 'Faturalar', 'Personel Gideri', 'Diğer Gider'];
 
 // User states
 const userStates: Record<number, any> = {};
@@ -75,7 +75,10 @@ bot.on('message', async (msg) => {
         userStates[userId] = { action: 'add_income', step: 'select_category' };
         const categoryKeyboard = {
             reply_markup: {
-                keyboard: incomeCategories.map(cat => [{ text: cat }]),
+                keyboard: [
+                    ...incomeCategories.map(cat => [{ text: cat }]),
+                    [{ text: '◀️ Geri' }]
+                ],
                 resize_keyboard: true,
                 one_time_keyboard: true,
             },
@@ -85,7 +88,10 @@ bot.on('message', async (msg) => {
         userStates[userId] = { action: 'add_expense', step: 'select_category' };
         const categoryKeyboard = {
             reply_markup: {
-                keyboard: expenseCategories.map(cat => [{ text: cat }]),
+                keyboard: [
+                    ...expenseCategories.map(cat => [{ text: cat }]),
+                    [{ text: '◀️ Geri' }]
+                ],
                 resize_keyboard: true,
                 one_time_keyboard: true,
             },
@@ -148,15 +154,36 @@ bot.on('message', async (msg) => {
         } else {
             bot.sendMessage(chatId, 'Geçen ay için tüm gerekli girişler mevcut.');
         }
+    } else if (text === '◀️ Geri') {
+        delete userStates[userId];
+        bot.sendMessage(chatId, 'Ana menüye dönüldü.', mainMenu);
     } else if (state.action === 'add_income' && state.step === 'select_category') {
         if (incomeCategories.includes(text)) {
             userStates[userId] = { ...state, category: text, step: 'enter_amount' };
-            bot.sendMessage(chatId, 'Tutar girin (örnek: 1000 veya 1.000,50):');
+            const amountKeyboard = {
+                reply_markup: {
+                    keyboard: [
+                        [{ text: '◀️ Geri' }]
+                    ],
+                    resize_keyboard: true,
+                    one_time_keyboard: false,
+                },
+            };
+            bot.sendMessage(chatId, 'Tutar girin (örnek: 1000 veya 1.000,50):', amountKeyboard);
         }
     } else if (state.action === 'add_expense' && state.step === 'select_category') {
         if (expenseCategories.includes(text)) {
             userStates[userId] = { ...state, category: text, step: 'enter_amount' };
-            bot.sendMessage(chatId, 'Tutar girin (örnek: 1000 veya 1.000,50):');
+            const amountKeyboard = {
+                reply_markup: {
+                    keyboard: [
+                        [{ text: '◀️ Geri' }]
+                    ],
+                    resize_keyboard: true,
+                    one_time_keyboard: false,
+                },
+            };
+            bot.sendMessage(chatId, 'Tutar girin (örnek: 1000 veya 1.000,50):', amountKeyboard);
         }
     } else if (state.step === 'enter_amount') {
         const amount = parseAmount(text);
