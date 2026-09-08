@@ -12,6 +12,14 @@ const authorizedUserIds = process.env.AUTHORIZED_TELEGRAM_USER_IDS?.split(',') |
 
 const bot = new TelegramBot(token, { polling: true });
 
+bot.on('polling_error', (error) => {
+    console.error('Telegram polling error:', error.message);
+});
+
+bot.on('error', (error) => {
+    console.error('Telegram bot error:', error.message);
+});
+
 // Helper function to check authorization
 function isAuthorized(userId: number): boolean {
     return authorizedUserIds.includes(userId.toString());
@@ -96,7 +104,10 @@ bot.onText(/\/start|\/menu/, (msg) => {
     const chatId = msg.chat.id;
     const userId = msg.from?.id;
 
+    console.log(`Menu command received from user ${userId ?? 'unknown'}`);
+
     if (!userId || !isAuthorized(userId)) {
+        console.warn(`Unauthorized Telegram user: ${userId ?? 'unknown'}`);
         bot.sendMessage(chatId, 'Yetkisiz kullanıcı.');
         return;
     }
