@@ -14,6 +14,7 @@ export default function AdminSidebar() {
     { href: '/admin/menu', label: 'Menü', icon: '📄' },
     { href: '/admin/contact', label: 'İletişim', icon: '📞' },
     { href: '/admin/finance-reports', label: 'Gelir Gider Raporları', icon: '💰' },
+    { href: '/admin/pos-sales', label: 'Adisyon Satışları', icon: '🧾' },
   ]
 
   const handleLogout = async () => {
@@ -35,8 +36,8 @@ export default function AdminSidebar() {
               key={item.href}
               href={item.href}
               className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive
-                  ? 'bg-primary text-white'
-                  : 'text-gray-700 hover:bg-gray-100'
+                ? 'bg-primary text-white'
+                : 'text-gray-700 hover:bg-gray-100'
                 }`}
             >
               <span className="text-xl">{item.icon}</span>

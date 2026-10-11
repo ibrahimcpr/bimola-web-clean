@@ -24,6 +24,9 @@ You have these options from Vercel Postgres:
    - **Name**: `ADMIN_PASSWORD`
    - **Value**: Your secure password
 
+   - **Name**: `POS_API_TOKEN`
+   - **Value**: A long random secret shared only with the Adisyon POS settings
+
 ### Option 2: Use PRISMA_DATABASE_URL in schema (Alternative)
 
 If you want to use `PRISMA_DATABASE_URL` directly without renaming, update `prisma/schema.prisma`:
@@ -39,11 +42,12 @@ But **Option 1 is recommended** because it's the standard Prisma convention.
 
 ## Final Environment Variables Checklist
 
-Make sure you have these 3 variables in Vercel:
+Make sure you have these 4 variables in Vercel:
 
 ✅ `DATABASE_URL` = (value from `PRISMA_DATABASE_URL`)
 ✅ `ADMIN_EMAIL` = your-admin-email@example.com
 ✅ `ADMIN_PASSWORD` = your-secure-password
+✅ `POS_API_TOKEN` = a-long-random-secret-used-by-the-POS-app
 
 ## After Setting Variables
 
@@ -54,6 +58,9 @@ Make sure you have these 3 variables in Vercel:
    npx prisma migrate deploy
    npm run db:seed
    ```
+   This applies the POS receipt and receipt-item tables.
+
+4. In Adisyon POS, open **Ayarlar → Web Sunucu Bağlantısı**. Enter the deployed site URL and the exact same `POS_API_TOKEN` value. Pending receipts are retried in order until the server returns HTTP 200 with `RECEIPT_RECORDED`.
 
 ## Important Notes
 

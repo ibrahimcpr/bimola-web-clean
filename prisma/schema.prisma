@@ -64,8 +64,38 @@ model FinanceRecord {
   month       Int
   year        Int
   created_by  String
+  source_receipt_no String? @unique
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
+}
+
+model PosReceipt {
+  id            String           @id @default(cuid())
+  receiptNo     String           @unique @map("receipt_no")
+  receiptDate   DateTime         @map("receipt_date")
+  tableName     String           @map("table_name")
+  paymentMethod String           @map("payment_method")
+  total         Float
+  receiptText   String           @db.Text @map("receipt_text")
+  createdAt     DateTime         @default(now()) @map("created_at")
+  items         PosReceiptItem[]
+
+  @@index([receiptDate])
+  @@map("pos_receipts")
+}
+
+model PosReceiptItem {
+  id          String     @id @default(cuid())
+  receiptId   String     @map("receipt_id")
+  productId   Int        @map("product_id")
+  productName String     @map("product_name")
+  unitPrice   Float      @map("unit_price")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  receipt     PosReceipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+
+  @@index([receiptId])
+  @@index([productId])
+  @@map("pos_receipt_items")
 }
 
 model AuthorizedUser {
