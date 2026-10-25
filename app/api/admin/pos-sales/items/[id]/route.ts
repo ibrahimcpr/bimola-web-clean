@@ -20,14 +20,6 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
             await tx.posReceiptItem.delete({ where: { id: item.id } })
             const nextTotal = Math.max(0, Math.round((item.receipt.total - item.unitPrice) * 100) / 100)
             await tx.posReceipt.update({ where: { id: item.receiptId }, data: { total: nextTotal } })
-            if (nextTotal === 0) {
-                await tx.financeRecord.deleteMany({ where: { source_receipt_no: item.receipt.receiptNo } })
-            } else {
-                await tx.financeRecord.updateMany({
-                    where: { source_receipt_no: item.receipt.receiptNo },
-                    data: { amount: nextTotal },
-                })
-            }
         })
 
         return NextResponse.json({ success: true })

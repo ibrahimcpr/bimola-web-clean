@@ -72,37 +72,22 @@ export async function POST(request: NextRequest) {
             return response('RECEIPT_RECORDED', 'Fiş daha önce kaydedilmiş.', 200)
         }
 
-        await prisma.$transaction(async (tx) => {
-            await tx.posReceipt.create({
-                data: {
-                    receiptNo: body.receiptNo,
-                    receiptDate,
-                    tableName: body.tableName,
-                    paymentMethod: body.paymentMethod,
-                    total: body.total,
-                    receiptText: body.receiptText,
-                    items: {
-                        create: body.items.map((item) => ({
-                            productId: item.productId,
-                            productName: item.productName.trim(),
-                            unitPrice: item.unitPrice,
-                        }))
-                    },
+        await prisma.posReceipt.create({
+            data: {
+                receiptNo: body.receiptNo,
+                receiptDate,
+                tableName: body.tableName,
+                paymentMethod: body.paymentMethod,
+                total: body.total,
+                receiptText: body.receiptText,
+                items: {
+                    create: body.items.map((item) => ({
+                        productId: item.productId,
+                        productName: item.productName.trim(),
+                        unitPrice: item.unitPrice,
+                    }))
                 },
-            })
-
-            await tx.financeRecord.create({
-                data: {
-                    record_type: 'income',
-                    category: 'POS Satış',
-                    amount: body.total,
-                    record_date: receiptDate,
-                    month: receiptDate.getUTCMonth() + 1,
-                    year: receiptDate.getUTCFullYear(),
-                    created_by: 'adisyon-pos',
-                    source_receipt_no: body.receiptNo,
-                },
-            })
+            },
         })
 
         return response('RECEIPT_RECORDED', 'Fiş sunucuya kaydedildi.', 200)
