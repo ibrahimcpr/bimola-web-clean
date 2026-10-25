@@ -39,6 +39,14 @@ export default function FinanceReportsPage() {
     const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([])
     const [categoryData, setCategoryData] = useState<CategoryData[]>([])
     const [records, setRecords] = useState<FinanceRecord[]>([])
+    const [recordsType, setRecordsType] = useState('all')
+    const [recordsStartDate, setRecordsStartDate] = useState('')
+    const [recordsEndDate, setRecordsEndDate] = useState('')
+    const [recordsSearch, setRecordsSearch] = useState('')
+    const [recordsPage, setRecordsPage] = useState(1)
+    const [recordsPages, setRecordsPages] = useState(1)
+    const [recordsTotal, setRecordsTotal] = useState(0)
+    const [recordsLoading, setRecordsLoading] = useState(true)
     const [filter, setFilter] = useState('last3months')
     const [month, setMonth] = useState<string>('')
     const [year, setYear] = useState<string>(new Date().getFullYear().toString())
@@ -88,27 +96,21 @@ export default function FinanceReportsPage() {
 
             let monthlyUrl = `/api/admin/finance/monthly?`
             let categoryUrl = `/api/admin/finance/category-breakdown?`
-            let recordsUrl = `/api/admin/finance/records?`
-
             if (filter === 'monthYear' && month && year) {
                 monthlyUrl += `month=${month}&year=${year}`
                 categoryUrl += `month=${month}&year=${year}`
-                recordsUrl += `month=${month}&year=${year}`
             } else if (queryStartDate && queryEndDate) {
                 monthlyUrl += `startDate=${queryStartDate}&endDate=${queryEndDate}`
                 categoryUrl += `startDate=${queryStartDate}&endDate=${queryEndDate}`
-                recordsUrl += `startDate=${queryStartDate}&endDate=${queryEndDate}`
             }
 
-            const [monthlyRes, categoryRes, recordsRes] = await Promise.all([
+            const [monthlyRes, categoryRes] = await Promise.all([
                 fetch(monthlyUrl),
                 fetch(categoryUrl),
-                fetch(recordsUrl),
             ])
 
             const monthly = await monthlyRes.json()
             const category = await categoryRes.json()
-            const recordsData = await recordsRes.json()
 
             const formattedMonthly = monthly.map((item: MonthlyData) => ({
                 ...item,
@@ -117,7 +119,6 @@ export default function FinanceReportsPage() {
 
             setMonthlyData(formattedMonthly)
             setCategoryData(category)
-            setRecords(recordsData.records || [])
         } catch (error) {
             console.error('Error fetching data:', error)
         } finally {
@@ -125,13 +126,46 @@ export default function FinanceReportsPage() {
         }
     }
 
+    const fetchRecords = async () => {
+        setRecordsLoading(true)
+        try {
+            const params = new URLSearchParams({ page: String(recordsPage), limit: '50' })
+            if (recordsType !== 'all') params.set('recordType', recordsType)
+            if (recordsStartDate) params.set('startDate', recordsStartDate)
+            if (recordsEndDate) params.set('endDate', recordsEndDate)
+            if (recordsSearch.trim()) params.set('search', recordsSearch.trim())
+
+            const response = await fetch(`/api/admin/finance/records?${params}`)
+            if (!response.ok) throw new Error('Kayıtlar alınamadı.')
+            const data = await response.json()
+            setRecords(data.records || [])
+            setRecordsTotal(data.total || 0)
+            setRecordsPages(Math.max(1, data.pages || 1))
+            if (recordsPage > Math.max(1, data.pages || 1)) {
+                setRecordsPage(Math.max(1, data.pages || 1))
+            }
+        } catch (error) {
+            console.error('Error fetching finance records:', error)
+            setRecords([])
+            setRecordsTotal(0)
+        } finally {
+            setRecordsLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        const timeout = window.setTimeout(() => void fetchRecords(), 250)
+        return () => window.clearTimeout(timeout)
+    }, [recordsType, recordsStartDate, recordsEndDate, recordsSearch, recordsPage])
+
     const handleDelete = async (id: string) => {
         if (!confirm('Kaydı silmek istediğinizden emin misiniz?')) return
 
         try {
             const res = await fetch(`/api/admin/finance/record/${id}`, { method: 'DELETE' })
             if (res.ok) {
-                fetchData()
+                void fetchData()
+                void fetchRecords()
             }
         } catch (error) {
             console.error('Error deleting record:', error)
@@ -149,7 +183,8 @@ export default function FinanceReportsPage() {
             })
             if (res.ok) {
                 setEditingId(null)
-                fetchData()
+                void fetchData()
+                void fetchRecords()
             }
         } catch (error) {
             console.error('Error updating record:', error)
@@ -316,7 +351,84 @@ export default function FinanceReportsPage() {
 
             {/* Records List */}
             <div className="bg-white p-4 rounded shadow">
-                <h2 className="text-lg font-semibold mb-4">Kayıtlar</h2>
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h2 className="text-lg font-semibold">Kayıtlar</h2>
+                        <p className="mt-1 text-sm text-gray-500">{recordsTotal} kayıt eşleşti</p>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                        <button
+                            type="button"
+                            disabled={recordsPage <= 1 || recordsLoading}
+                            onClick={() => setRecordsPage((page) => Math.max(1, page - 1))}
+                            className="rounded border px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        >Önceki</button>
+                        <span>{recordsPage} / {recordsPages}</span>
+                        <button
+                            type="button"
+                            disabled={recordsPage >= recordsPages || recordsLoading}
+                            onClick={() => setRecordsPage((page) => Math.min(recordsPages, page + 1))}
+                            className="rounded border px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        >Sonraki</button>
+                    </div>
+                </div>
+                <div className="mb-4 grid grid-cols-1 gap-3 rounded border bg-gray-50 p-3 sm:grid-cols-2 xl:grid-cols-5">
+                    <label className="text-sm font-medium">
+                        Kayıt türü
+                        <select
+                            value={recordsType}
+                            onChange={(event) => { setRecordsType(event.target.value); setRecordsPage(1) }}
+                            className="mt-1 block w-full rounded border bg-white px-3 py-2"
+                        >
+                            <option value="all">Tüm kayıtlar</option>
+                            <option value="income">Gelirler</option>
+                            <option value="expense">Giderler</option>
+                        </select>
+                    </label>
+                    <label className="text-sm font-medium">
+                        Başlangıç tarihi
+                        <input
+                            type="date"
+                            value={recordsStartDate}
+                            max={recordsEndDate || undefined}
+                            onChange={(event) => { setRecordsStartDate(event.target.value); setRecordsPage(1) }}
+                            className="mt-1 block w-full rounded border bg-white px-3 py-2"
+                        />
+                    </label>
+                    <label className="text-sm font-medium">
+                        Bitiş tarihi
+                        <input
+                            type="date"
+                            value={recordsEndDate}
+                            min={recordsStartDate || undefined}
+                            onChange={(event) => { setRecordsEndDate(event.target.value); setRecordsPage(1) }}
+                            className="mt-1 block w-full rounded border bg-white px-3 py-2"
+                        />
+                    </label>
+                    <label className="text-sm font-medium sm:col-span-2">
+                        Kategori veya kaydı oluşturan
+                        <input
+                            type="search"
+                            value={recordsSearch}
+                            onChange={(event) => { setRecordsSearch(event.target.value); setRecordsPage(1) }}
+                            placeholder="Örn. POS Satış veya Telegram"
+                            className="mt-1 block w-full rounded border bg-white px-3 py-2"
+                        />
+                    </label>
+                    <div className="flex items-end">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setRecordsType('all')
+                                setRecordsStartDate('')
+                                setRecordsEndDate('')
+                                setRecordsSearch('')
+                                setRecordsPage(1)
+                            }}
+                            className="w-full rounded border bg-white px-3 py-2 text-sm font-medium hover:bg-gray-100"
+                        >Filtreleri temizle</button>
+                    </div>
+                </div>
                 <div className="overflow-x-auto">
                     <table className="min-w-full table-auto">
                         <thead>
@@ -330,7 +442,11 @@ export default function FinanceReportsPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {records.map((record) => (
+                            {recordsLoading ? (
+                                <tr><td className="px-4 py-8 text-center text-gray-500" colSpan={6}>Kayıtlar yükleniyor...</td></tr>
+                            ) : records.length === 0 ? (
+                                <tr><td className="px-4 py-8 text-center text-gray-500" colSpan={6}>Bu filtrelerle eşleşen kayıt bulunamadı.</td></tr>
+                            ) : records.map((record) => (
                                 <tr key={record.id} className="border-t">
                                     {editingId === record.id ? (
                                         <>
